@@ -1,4 +1,4 @@
-file-version: 3
+file-version: 4
 
 # You can change all messages inside this file.
 # Messages use minimessage format: https://docs.advntr.dev/minimessage/index.html
@@ -7,8 +7,8 @@ file-version: 3
 # [queue-position] which will display queue position
 
 # These messages are for errors under reconnection, such as not whitelisted or banned.
-bannedMessage: "<red>⛔ You are banned from that server.</red>"
-notWhitelisted: "<red>⚠ You are not whitelisted on that server.</red>"
+bannedMessage: "<red>??You are banned from that server.</red>"
+notWhitelisted: "<red>??You are not whitelisted on that server.</red>"
 
 maintenanceMode: "<red>The server you're trying to connect to is currently in maintenance mode! You will be reconnected once it's available again."
 
@@ -20,4 +20,9 @@ queuePosition: "<yellow>Queue position: [queue-position]"
 queuePositionJoin: "<yellow>You are in the queue. Position: [queue-position]"
 
 # Welcome messages
-welcomeMessage: "<blue>🌌 You were sent to Limbo.</blue> \n<gray>You will be reconnected when the system allows.</gray>"
+welcomeMessage: "<blue>?뙆 You were sent to Limbo.</blue> \n<gray>You will be reconnected when the system allows.</gray>"
+
+# Privacy consent messages
+privacyConsentPrompt: "<yellow>개인정보이용약관에 동의해주세요. <green><click:run_command:'/vlh agree'>[동의]</click></green></yellow>"
+privacyConsentAccepted: "<green>동의가 완료되었습니다.</green>"
+privacyConsentAlready: "<gray>이미 동의했습니다.</gray>"

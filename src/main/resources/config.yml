@@ -1,10 +1,10 @@
-file-version: 6
+file-version: 9
 
 # Server configs - These are settings you need to change!
 # The name of the limbo server in your velocity network
 limbo-name: limbo # Default "limbo"
 
-# Direct-connect-server is the name of the server you want players to connect to if they connected directly to the server in the velocity network
+# Direct-connect-server is optional; if not found, the first server in default-group will be used as a fallback.
 direct-connect-server: lobby # Default "lobby"
 
 # How often the server should check if it can connect
@@ -16,3 +16,36 @@ queue-notify-interval: 30 # The time in seconds (Default: 30)
 
 # A list of disabled commands, which will not work inside the Limbo server. Recommended commands are ones that the player can use to transfer server, like /server or /hub
 disabled-commands: ["server", "lobby", "hub"]
+
+# Privacy consent settings
+privacy-consent:
+  enabled: true
+  prompt-cooldown-seconds: 5
+
+# Consent storage (local sqlite by default)
+consent-storage:
+  type: "local" # local or memory
+  file: "consent.db"
+
+# Channel storage (ValioBungee Redis)
+channel-storage:
+  type: "redisbungee" # redisbungee or memory
+  key-prefix: "vlh"
+
+# Default group to use when no previous group exists
+default-group: "main"
+
+# Channel group definitions
+group:
+  main:
+    servers: ["main_1", "main_2"]
+    max-player: 50
+  dungeon:
+    servers: ["dun_1", "dun_2", "dun_3"]
+    max-player: 50
+  field:
+    servers: ["field_1", "field_2"]
+    max-player: 50
+  mine:
+    servers: ["mine_1", "mine_2"]
+    max-player: 50

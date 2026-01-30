@@ -239,6 +239,10 @@
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -267,6 +271,19 @@
             <artifactId>bstats-velocity</artifactId>
             <version>3.0.2</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.45.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ProxioDev.ValioBungee</groupId>
+            <artifactId>RedisBungee-Velocity</artifactId>
+            <version>0.12.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

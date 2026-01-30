@@ -21,6 +21,7 @@ public class PlayerManager {
     private final Map<String, Queue<Player>> reconnectQueues = new ConcurrentHashMap<>();
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final Map<UUID, String> playerConnectionIssues = new ConcurrentHashMap<>();
+    private final Map<UUID, String> intendedServers = new ConcurrentHashMap<>();
     private static String queuePositionMsg;
 
     /**
@@ -49,6 +50,15 @@ public class PlayerManager {
         if (this.playerData.containsKey(player)) return;
 
         if (isAuthBlocked(player)) return;
+        if (registeredServer == null) {
+            registeredServer = VelocityLimboHandler.getDirectConnectServer();
+        }
+        if (registeredServer == null) {
+            registeredServer = VelocityLimboHandler.getLimboServer();
+        }
+        if (registeredServer == null) {
+            return;
+        }
 
         String serverName = registeredServer.getServerInfo().getName();
         this.playerData.put(player, serverName);
@@ -57,9 +67,27 @@ public class PlayerManager {
 
         // Only maintain a reconnect queue when queue mode is enabled
         Queue<Player> queue = reconnectQueues.computeIfAbsent(serverName, s -> new ConcurrentLinkedQueue<>());
-        if (VelocityLimboHandler.isQueueEnabled() && !queue.contains(player)) {
+        boolean consented = VelocityLimboHandler.getConsentManager() == null
+                || VelocityLimboHandler.getConsentManager().hasConsent(player);
+        if (VelocityLimboHandler.isQueueEnabled() && consented && !queue.contains(player)) {
             addPlayerToQueue(player, registeredServer);
 
+            String formatedMsg = MessageFormatter.formatMessage(queuePositionMsg, player);
+            player.sendMessage(miniMessage.deserialize(formatedMsg));
+        }
+    }
+
+    public void enqueuePlayer(Player player) {
+        if (!VelocityLimboHandler.isQueueEnabled()) return;
+        if (VelocityLimboHandler.getConsentManager() != null
+                && !VelocityLimboHandler.getConsentManager().hasConsent(player)) {
+            return;
+        }
+
+        RegisteredServer server = getPreviousServer(player);
+        Queue<Player> queue = reconnectQueues.computeIfAbsent(server.getServerInfo().getName(), s -> new ConcurrentLinkedQueue<>());
+        if (!queue.contains(player)) {
+            queue.add(player);
             String formatedMsg = MessageFormatter.formatMessage(queuePositionMsg, player);
             player.sendMessage(miniMessage.deserialize(formatedMsg));
         }
@@ -73,7 +101,21 @@ public class PlayerManager {
         removePlayerFromQueue(player);
         this.playerData.remove(player);
         this.connectingPlayers.remove(player);
+        this.intendedServers.remove(player.getUniqueId());
         VelocityLimboHandler.getReconnectBlocker().unblock(player.getUniqueId());
+    }
+
+    public void setIntendedServer(Player player, RegisteredServer server) {
+        if (server == null) return;
+        intendedServers.put(player.getUniqueId(), server.getServerInfo().getName());
+    }
+
+    public RegisteredServer consumeIntendedServer(Player player) {
+        String serverName = intendedServers.remove(player.getUniqueId());
+        if (serverName == null) return null;
+        return VelocityLimboHandler.getProxyServer()
+                .getServer(serverName)
+                .orElse(null);
     }
 
     /**
@@ -90,7 +132,18 @@ public class PlayerManager {
                     .orElse(VelocityLimboHandler.getDirectConnectServer());
         }
 
-        return VelocityLimboHandler.getDirectConnectServer();
+        if (VelocityLimboHandler.getChannelGroupRegistry() != null) {
+            var group = VelocityLimboHandler.getChannelGroupRegistry().getGroup(VelocityLimboHandler.getDefaultGroupName());
+            if (group != null && !group.getServers().isEmpty()) {
+                return VelocityLimboHandler.getProxyServer()
+                        .getServer(group.getServers().get(0))
+                        .orElse(VelocityLimboHandler.getDirectConnectServer());
+            }
+        }
+
+        RegisteredServer fallback = VelocityLimboHandler.getDirectConnectServer();
+        if (fallback != null) return fallback;
+        return VelocityLimboHandler.getLimboServer();
     }
 
     public boolean isPlayerRegistered(Player player) {
